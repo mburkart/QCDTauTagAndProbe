@@ -120,22 +120,6 @@ class NtuplizerQCD : public edm::EDAnalyzer {
       int tau_genindex_;
       float tauTrkPt_;
 
-      float tauProbeIsolationTracksPtSum_;
-      float tauProbeIsolationEcalhitsEtSum_;
-      float tauProbeIsolationPFChargedHadrCandsPtSum_;
-      float tauProbeIsolationPFGammaCandsEtSum_;
-      float tauProbeEmFraction_;
-      float tauProbeEcalEnergy_;
-      float tauProbeEcalStripSumEOverPLead_;
-      float tauProbeMaximumHcalPFClusterEt_;
-      float tauProbeHcalEnergy_;
-      float tauProbeHcal3x3OverPLead_;
-      float tauProbeHcalTotOverPLead_;
-      float tauProbeEtaetaMoment_;
-      float tauProbeEtaphiMoment_;
-      float tauProbePhiphiMoment_;
-      float tauProbeBremsRecoveryEOverPLead_;
-
       float jetTagPt_;
       float jetTagEta_;
       float jetTagPhi_;
@@ -446,22 +430,6 @@ void NtuplizerQCD::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
                             tauDM_ = tau->decayMode();
                             tauTrkPt_ = tau->leadChargedHadrCand()->pt();
 
-                            tauProbeIsolationTracksPtSum_ = tau->isolationTracksPtSum();
-                            tauProbeIsolationEcalhitsEtSum_ = tau->isolationECALhitsEtSum();
-                            tauProbeIsolationPFChargedHadrCandsPtSum_ = tau->isolationPFChargedHadrCandsPtSum();
-                            tauProbeIsolationPFGammaCandsEtSum_ = tau->isolationPFGammaCandsEtSum();
-                            tauProbeEcalEnergy_ = tau->ecalEnergy();
-                            tauProbeEcalStripSumEOverPLead_ = tau->ecalStripSumEOverPLead();
-                            tauProbeEmFraction_ = tau->emFraction();
-                            tauProbeMaximumHcalPFClusterEt_ = tau->maximumHCALPFClusterEt();
-                            tauProbeHcalEnergy_ = tau->hcalEnergy();
-                            tauProbeHcal3x3OverPLead_ = tau->hcal3x3OverPLead();
-                            tauProbeHcalTotOverPLead_ = tau->hcalTotOverPLead();
-                            tauProbeEtaetaMoment_ = tau->etaetaMoment();
-                            tauProbeEtaphiMoment_ = tau->etaphiMoment();
-                            tauProbePhiphiMoment_ = tau->phiphiMoment();
-                            tauProbeBremsRecoveryEOverPLead_ = tau->bremsRecoveryEOverPLead();
-
                             tauByIsolationMVArun2017v2DBoldDMwLTraw2017_ = tau->tauID("byIsolationMVArun2017v2DBoldDMwLTraw2017");
                             tauByVVLooseIsolationMVArun2017v2DBoldDMwLT2017_ = tau->tauID("byVVLooseIsolationMVArun2017v2DBoldDMwLT2017");
                             tauByVLooseIsolationMVArun2017v2DBoldDMwLT2017_ = tau->tauID("byVLooseIsolationMVArun2017v2DBoldDMwLT2017");
@@ -574,22 +542,6 @@ void NtuplizerQCD::beginJob()
     tree_->Branch("tauDM", &tauDM_, "tauDM/I");
     tree_->Branch("tauTrkPt", &tauTrkPt_, "tauTrkPt/F");
     tree_->Branch("tau_genindex", &tau_genindex_, "tau_genindex/I");
-
-    tree_ -> Branch("tauIsolationTracksPtSum", &tauProbeIsolationTracksPtSum_, "tauIsolationTracksPtSum/F");
-    tree_ -> Branch("tauIsolationEcalhitsEtSum", &tauProbeIsolationEcalhitsEtSum_, "tauIsolationEcalhitsEtSum/F");
-    tree_ -> Branch("tauIsolationPFChargedHadrCandsPtSum", &tauProbeIsolationPFChargedHadrCandsPtSum_, "tauIsolationPFChargedHadrCandsPtSum/F");
-    tree_ -> Branch("tauIsolationPFGammaCandsEtSum", &tauProbeIsolationPFGammaCandsEtSum_, "tauIsolationPFGammaCandsEtSum/F");
-    tree_ -> Branch("tauEmFraction", &tauProbeEmFraction_, "tauEmFraction/F");
-    tree_ -> Branch("tauEcalEnergy", &tauProbeEcalEnergy_, "tauEcalEnergy/F");
-    tree_ -> Branch("tauEcalStripSumEOverPLead", &tauProbeEcalStripSumEOverPLead_, "tauEcalStripSumEOverPLead/F");
-    tree_ -> Branch("tauMaximumHcalPFClusterEt", &tauProbeMaximumHcalPFClusterEt_, "tauMaximumHcalPFClusterEt/F");
-    tree_ -> Branch("tauHcalEnergy", &tauProbeHcalEnergy_, "tauHcalEnergy/F");
-    tree_ -> Branch("tauHcal3x3OverPLead", &tauProbeHcal3x3OverPLead_, "tauHcal3x3OverPLead/F");
-    tree_ -> Branch("tauHcalTotOverPLead", &tauProbeHcalTotOverPLead_, "tauHcalTotOverPLead/F");
-    tree_ -> Branch("tauEtaetaMoment", &tauProbeEtaetaMoment_, "tauEtaetaMoment/F");
-    tree_ -> Branch("tauEtaphiMoment", &tauProbeEtaphiMoment_, "tauEtaphiMoment/F");
-    tree_ -> Branch("tauPhiphiMoment", &tauProbePhiphiMoment_, "tauPhiphiMoment/F");
-    tree_ -> Branch("tauBremsRecoveryEOverPLead", &tauProbeBremsRecoveryEOverPLead_, "tauBremsRecoveryEOverPLead/F");
 
     tree_->Branch("tauByLooseCombinedIsolationDeltaBetaCorr3Hits", &tauByLooseCombinedIsolationDeltaBetaCorr3Hits_, "tauByLooseCombinedIsolationDeltaBetaCorr3Hits/O");
     tree_->Branch("tauByMediumCombinedIsolationDeltaBetaCorr3Hits", &tauByMediumCombinedIsolationDeltaBetaCorr3Hits_, "tauByMediumCombinedIsolationDeltaBetaCorr3Hits/O");
@@ -732,21 +684,6 @@ void NtuplizerQCD::Initialize()
     tauDM_ = -1;
     tauTrkPt_ = -1.;
     tau_genindex_ = -1;
-    tauProbeIsolationTracksPtSum_ = -1.;
-    tauProbeIsolationEcalhitsEtSum_ = -1.;
-    tauProbeIsolationPFChargedHadrCandsPtSum_ = -1.;
-    tauProbeIsolationPFGammaCandsEtSum_ = -1.;
-    tauProbeEmFraction_ = -1.;
-    tauProbeEcalEnergy_ = -1.;
-    tauProbeEcalStripSumEOverPLead_ = -1.;
-    tauProbeMaximumHcalPFClusterEt_ = -1.;
-    tauProbeHcalEnergy_ = -1.;
-    tauProbeHcal3x3OverPLead_ = -1.;
-    tauProbeHcalTotOverPLead_ = -1.;
-    tauProbeEtaetaMoment_ = -1.;
-    tauProbeEtaphiMoment_ = -1.;
-    tauProbePhiphiMoment_ = -1.;
-    tauProbeBremsRecoveryEOverPLead_ = -1.;
 
     tauByLooseCombinedIsolationDeltaBetaCorr3Hits_ = 0;
     tauByMediumCombinedIsolationDeltaBetaCorr3Hits_ = 0;
