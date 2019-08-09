@@ -25,18 +25,18 @@ class Background_filter_QCD : public edm::EDFilter
         bool filter(edm::Event&, edm::EventSetup const&);
 
         edm::EDGetTokenT<pat::MuonRefVector> muonTag_;
-        edm::EDGetTokenT<edm::View<reco::GsfElectron>> eleTag_;
-        edm::EDGetTokenT<edm::ValueMap<bool>> eleIdMapTag_;
+        edm::EDGetTokenT<edm::View<pat::Electron>> eleTag_;
         edm::EDGetTokenT<pat::JetRefVector> bjetTag_;
+        std::string eleIdTag_;
 
         bool decision_;
 };
 
 Background_filter_QCD::Background_filter_QCD(const edm::ParameterSet& iConfig) :
     muonTag_ (consumes<pat::MuonRefVector> (iConfig.getParameter<edm::InputTag>("muons"))),
-    eleTag_ (consumes<edm::View<reco::GsfElectron>> (iConfig.getParameter<edm::InputTag>("electrons"))),
-    eleIdMapTag_ (consumes<edm::ValueMap<bool>> (iConfig.getParameter<edm::InputTag>("eleIdMap"))),
+    eleTag_ (consumes<edm::View<pat::Electron>> (iConfig.getParameter<edm::InputTag>("electrons"))),
     bjetTag_ (consumes<pat::JetRefVector> (iConfig.getParameter<edm::InputTag>("bjets"))),
+    eleIdTag_ (iConfig.getParameter<std::string>("electronId")),
     decision_ (true)
 {}
 
@@ -55,14 +55,12 @@ bool Background_filter_QCD::filter(edm::Event& iEvent, edm::EventSetup const& iS
     }
 
     // Electron veto
-    edm::Handle<edm::View<reco::GsfElectron>> eleHandle;
+    edm::Handle<edm::View<pat::Electron>> eleHandle;
     iEvent.getByToken(eleTag_, eleHandle);
-    edm::Handle<edm::ValueMap<bool>> ele_id_map;
-    iEvent.getByToken(eleIdMapTag_, ele_id_map);
     for (unsigned int i = 0; i < eleHandle->size(); i+=1)
     {
         const auto ele = eleHandle->ptrAt(i);
-        int eleId = (*ele_id_map)[ele];
+        int eleId = ele->electronID(eleIdTag_);
         if (eleId && ele->p4().Pt() > 10 && fabs(ele->p4().Eta()) < 2.5)
         {
             decision_ = false;
