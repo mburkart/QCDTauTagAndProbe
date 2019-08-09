@@ -81,6 +81,7 @@ class NtuplizerQCD : public edm::EDAnalyzer {
 
       void Initialize();
       bool hasFilters(const pat::TriggerObjectStandAlone&, const std::vector<std::string>&);
+      bool passesJetID(const pat::JetRef&, const int);
       int GenIndex(const pat::TauRef&, const edm::View<pat::GenericParticle>*);
       // ----------member data ---------------------------
       edm::EDGetTokenT<pat::TauRefVector> tauTag_;
@@ -97,6 +98,7 @@ class NtuplizerQCD : public edm::EDAnalyzer {
       bool useHLTMatch_;
       bool isMC_;
       std::string filterPath_;
+      int year_;
 
       TTree* tree_;
       TTree* triggerNamesTree_;
@@ -127,16 +129,16 @@ class NtuplizerQCD : public edm::EDAnalyzer {
       float jetProbeEta_;
       float jetProbePhi_;
       int jetProbePartonFlavour_;
-      float jetProbeNeutHadFrac_ = -1.;
-      float jetProbeNeutEMFrac_ = -1.;
-      int jetProbeNumConsts_ = -1;
-      float jetProbeMuonFrac_ = -1.;
-      float jetProbeChargedHadFrac_ = -1.;
-      int jetProbeChargedMult_ = -1;
-      float jetProbeChargedEMFrac_ = -1.;
-      int jetProbeN60_ = -1;
-      int jetProbeN90_ = -1;
-      float jetProbeQgLikelihood_ = -1.;
+      float jetProbeNeutHadFrac_;
+      float jetProbeNeutEMFrac_;
+      int jetProbeNumConsts_;
+      float jetProbeMuonFrac_;
+      float jetProbeChargedHadFrac_;
+      int jetProbeChargedMult_;
+      float jetProbeChargedEMFrac_;
+      int jetProbeN60_;
+      int jetProbeN90_;
+      float jetProbeQgLikelihood_;
       int nJets_;
 
       float metPt_;
@@ -145,6 +147,7 @@ class NtuplizerQCD : public edm::EDAnalyzer {
       bool tauByLooseCombinedIsolationDeltaBetaCorr3Hits_;
       bool tauByMediumCombinedIsolationDeltaBetaCorr3Hits_;
       bool tauByTightCombinedIsolationDeltaBetaCorr3Hits_;
+
       float tauByIsolationMVArun2017v2DBoldDMwLTraw2017_;
       bool tauByVVLooseIsolationMVArun2017v2DBoldDMwLT2017_;
       bool tauByVLooseIsolationMVArun2017v2DBoldDMwLT2017_;
@@ -153,6 +156,7 @@ class NtuplizerQCD : public edm::EDAnalyzer {
       bool tauByTightIsolationMVArun2017v2DBoldDMwLT2017_;
       bool tauByVTightIsolationMVArun2017v2DBoldDMwLT2017_;
       bool tauByVVTightIsolationMVArun2017v2DBoldDMwLT2017_;
+
       float tauByIsolationMVArun2017v2DBnewDMwLTraw2017_;
       bool tauByVVLooseIsolationMVArun2017v2DBnewDMwLT2017_;
       bool tauByVLooseIsolationMVArun2017v2DBnewDMwLT2017_;
@@ -161,6 +165,32 @@ class NtuplizerQCD : public edm::EDAnalyzer {
       bool tauByTightIsolationMVArun2017v2DBnewDMwLT2017_;
       bool tauByVTightIsolationMVArun2017v2DBnewDMwLT2017_;
       bool tauByVVTightIsolationMVArun2017v2DBnewDMwLT2017_;
+
+      float tauByDeepTau2017v2VSjetraw_;
+      bool tauByVVVLooseDeepTau2017v2VSjet_;
+      bool tauByVVLooseDeepTau2017v2VSjet_;
+      bool tauByVLooseDeepTau2017v2VSjet_;
+      bool tauByLooseDeepTau2017v2VSjet_;
+      bool tauByMediumDeepTau2017v2VSjet_;
+      bool tauByTightDeepTau2017v2VSjet_;
+      bool tauByVTightDeepTau2017v2VSjet_;
+      bool tauByVVTightDeepTau2017v2VSjet_;
+
+      float tauByDeepTau2017v2VSeraw_;
+      bool tauByVVVLooseDeepTau2017v2VSe_;
+      bool tauByVVLooseDeepTau2017v2VSe_;
+      bool tauByVLooseDeepTau2017v2VSe_;
+      bool tauByLooseDeepTau2017v2VSe_;
+      bool tauByMediumDeepTau2017v2VSe_;
+      bool tauByTightDeepTau2017v2VSe_;
+      bool tauByVTightDeepTau2017v2VSe_;
+      bool tauByVVTightDeepTau2017v2VSe_;
+        
+      float tauByDeepTau2017v2VSmuraw_;
+      bool tauByVLooseDeepTau2017v2VSmu_;
+      bool tauByLooseDeepTau2017v2VSmu_;
+      bool tauByMediumDeepTau2017v2VSmu_;
+      bool tauByTightDeepTau2017v2VSmu_;
 
       bool tauAgainstMuonLoose3_;
       bool tauAgainstMuonTight3_;
@@ -219,7 +249,8 @@ NtuplizerQCD::NtuplizerQCD(const edm::ParameterSet& iConfig) :
     treeName_ (iConfig.getParameter<std::string>("treeName")),
     useHLTMatch_ (iConfig.getParameter<bool>("useHLTMatch")),
     isMC_ (iConfig.getParameter<bool>("isMC")),
-    filterPath_ (iConfig.getParameter<std::string>("filterPath"))
+    filterPath_ (iConfig.getParameter<std::string>("filterPath")),
+    year_ (iConfig.getParameter<int>("year"))
 {
    TString triggerName;
    edm::Service<TFileService> fs;
@@ -304,8 +335,9 @@ void NtuplizerQCD::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     for (unsigned int i = 0; i < jets->size(); i+=1)
     {
         const pat::JetRef jetTag = jets->at(i);
-        int tagId = jetTag->userInt("tightJetIdLepVeto");
-        if (tagId == 1)
+        bool tagId = passesJetID(jetTag, year_);
+        // int tagId = jetTag->userInt("tightJetIdLepVeto");
+        if (tagId)
         {
             for (unsigned int j = 0; j < jets->size(); j+=1)
             {
@@ -430,6 +462,10 @@ void NtuplizerQCD::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
                             tauDM_ = tau->decayMode();
                             tauTrkPt_ = tau->leadChargedHadrCand()->pt();
 
+                            tauByLooseCombinedIsolationDeltaBetaCorr3Hits_ = tau->tauID("byLooseCombinedIsolationDeltaBetaCorr3Hits");
+                            tauByMediumCombinedIsolationDeltaBetaCorr3Hits_ = tau->tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits");
+                            tauByTightCombinedIsolationDeltaBetaCorr3Hits_ = tau->tauID("byTightCombinedIsolationDeltaBetaCorr3Hits");
+
                             tauByIsolationMVArun2017v2DBoldDMwLTraw2017_ = tau->tauID("byIsolationMVArun2017v2DBoldDMwLTraw2017");
                             tauByVVLooseIsolationMVArun2017v2DBoldDMwLT2017_ = tau->tauID("byVVLooseIsolationMVArun2017v2DBoldDMwLT2017");
                             tauByVLooseIsolationMVArun2017v2DBoldDMwLT2017_ = tau->tauID("byVLooseIsolationMVArun2017v2DBoldDMwLT2017");
@@ -438,6 +474,7 @@ void NtuplizerQCD::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
                             tauByTightIsolationMVArun2017v2DBoldDMwLT2017_ = tau->tauID("byTightIsolationMVArun2017v2DBoldDMwLT2017");
                             tauByVTightIsolationMVArun2017v2DBoldDMwLT2017_ = tau->tauID("byVTightIsolationMVArun2017v2DBoldDMwLT2017");
                             tauByVVTightIsolationMVArun2017v2DBoldDMwLT2017_ = tau->tauID("byVVTightIsolationMVArun2017v2DBoldDMwLT2017");
+
                             tauByIsolationMVArun2017v2DBnewDMwLTraw2017_ = tau->tauID("byIsolationMVArun2017v2DBnewDMwLTraw2017");
                             tauByVVLooseIsolationMVArun2017v2DBnewDMwLT2017_ = tau->tauID("byVVLooseIsolationMVArun2017v2DBnewDMwLT2017");
                             tauByVLooseIsolationMVArun2017v2DBnewDMwLT2017_ = tau->tauID("byVLooseIsolationMVArun2017v2DBnewDMwLT2017");
@@ -446,9 +483,33 @@ void NtuplizerQCD::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
                             tauByTightIsolationMVArun2017v2DBnewDMwLT2017_ = tau->tauID("byTightIsolationMVArun2017v2DBnewDMwLT2017");
                             tauByVTightIsolationMVArun2017v2DBnewDMwLT2017_ = tau->tauID("byVTightIsolationMVArun2017v2DBnewDMwLT2017");
                             tauByVVTightIsolationMVArun2017v2DBnewDMwLT2017_ = tau->tauID("byVVTightIsolationMVArun2017v2DBnewDMwLT2017");
-                            tauByLooseCombinedIsolationDeltaBetaCorr3Hits_ = tau->tauID("byLooseCombinedIsolationDeltaBetaCorr3Hits");
-                            tauByMediumCombinedIsolationDeltaBetaCorr3Hits_ = tau->tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits");
-                            tauByTightCombinedIsolationDeltaBetaCorr3Hits_ = tau->tauID("byTightCombinedIsolationDeltaBetaCorr3Hits");
+
+                            tauByDeepTau2017v2VSjetraw_ = tau->tauID("byDeepTau2017v2VSjetraw");
+                            tauByVVVLooseDeepTau2017v2VSjet_ = tau->tauID("byVVVLooseDeepTau2017v2VSjet");
+                            tauByVVLooseDeepTau2017v2VSjet_ = tau->tauID("byVVLooseDeepTau2017v2VSjet");
+                            tauByVLooseDeepTau2017v2VSjet_ = tau->tauID("byVLooseDeepTau2017v2VSjet");
+                            tauByLooseDeepTau2017v2VSjet_ = tau->tauID("byLooseDeepTau2017v2VSjet");
+                            tauByMediumDeepTau2017v2VSjet_ = tau->tauID("byMediumDeepTau2017v2VSjet");
+                            tauByTightDeepTau2017v2VSjet_ = tau->tauID("byTightDeepTau2017v2VSjet");
+                            tauByVTightDeepTau2017v2VSjet_ = tau->tauID("byVTightDeepTau2017v2VSjet");
+                            tauByVVTightDeepTau2017v2VSjet_ = tau->tauID("byVVTightDeepTau2017v2VSjet");
+
+                            tauByDeepTau2017v2VSeraw_ = tau->tauID("byDeepTau2017v2VSeraw");
+                            tauByVVVLooseDeepTau2017v2VSe_ = tau->tauID("byVVVLooseDeepTau2017v2VSe");
+                            tauByVVLooseDeepTau2017v2VSe_ = tau->tauID("byVVLooseDeepTau2017v2VSe");
+                            tauByVLooseDeepTau2017v2VSe_ = tau->tauID("byVLooseDeepTau2017v2VSe");
+                            tauByLooseDeepTau2017v2VSe_ = tau->tauID("byLooseDeepTau2017v2VSe");
+                            tauByMediumDeepTau2017v2VSe_ = tau->tauID("byMediumDeepTau2017v2VSe");
+                            tauByTightDeepTau2017v2VSe_ = tau->tauID("byTightDeepTau2017v2VSe");
+                            tauByVTightDeepTau2017v2VSe_ = tau->tauID("byVTightDeepTau2017v2VSe");
+                            tauByVVTightDeepTau2017v2VSe_ = tau->tauID("byVVTightDeepTau2017v2VSe");
+
+                            tauByDeepTau2017v2VSmuraw_ = tau->tauID("byDeepTau2017v2VSmuraw");
+                            tauByVLooseDeepTau2017v2VSmu_ = tau->tauID("byVLooseDeepTau2017v2VSmu");
+                            tauByLooseDeepTau2017v2VSmu_ = tau->tauID("byLooseDeepTau2017v2VSmu");
+                            tauByMediumDeepTau2017v2VSmu_ = tau->tauID("byMediumDeepTau2017v2VSmu");
+                            tauByTightDeepTau2017v2VSmu_ = tau->tauID("byTightDeepTau2017v2VSmu");
+                            
                             tauAgainstMuonLoose3_ = tau->tauID("againstMuonLoose3");
                             tauAgainstMuonTight3_ = tau->tauID("againstMuonTight3");
                             tauAgainstElectronVLooseMVA6_ = tau->tauID("againstElectronVLooseMVA6");
@@ -546,6 +607,7 @@ void NtuplizerQCD::beginJob()
     tree_->Branch("tauByLooseCombinedIsolationDeltaBetaCorr3Hits", &tauByLooseCombinedIsolationDeltaBetaCorr3Hits_, "tauByLooseCombinedIsolationDeltaBetaCorr3Hits/O");
     tree_->Branch("tauByMediumCombinedIsolationDeltaBetaCorr3Hits", &tauByMediumCombinedIsolationDeltaBetaCorr3Hits_, "tauByMediumCombinedIsolationDeltaBetaCorr3Hits/O");
     tree_->Branch("tauByTightCombinedIsolationDeltaBetaCorr3Hits", &tauByTightCombinedIsolationDeltaBetaCorr3Hits_, "tauByTightCombinedIsolationDeltaBetaCorr3Hits/O");
+    
     tree_->Branch("tauByIsolationMVArun2017v2DBoldDMwLTraw2017", &tauByIsolationMVArun2017v2DBoldDMwLTraw2017_, "tauByIsolationMVArun2017v2DBoldDMwLTraw2017/F");
     tree_->Branch("tauByVVLooseIsolationMVArun2017v2DBoldDMwLT2017", &tauByVVLooseIsolationMVArun2017v2DBoldDMwLT2017_, "tauByVVLooseIsolationMVArun2017v2DBoldDMwLT2017/O");
     tree_->Branch("tauByVLooseIsolationMVArun2017v2DBoldDMwLT2017", &tauByVLooseIsolationMVArun2017v2DBoldDMwLT2017_, "tauByVLooseIsolationMVArun2017v2DBoldDMwLT2017/O");
@@ -554,6 +616,7 @@ void NtuplizerQCD::beginJob()
     tree_->Branch("tauByTightIsolationMVArun2017v2DBoldDMwLT2017", &tauByTightIsolationMVArun2017v2DBoldDMwLT2017_, "tauByTightIsolationMVArun2017v2DBoldDMwLT2017/O");
     tree_->Branch("tauByVTightIsolationMVArun2017v2DBoldDMwLT2017", &tauByVTightIsolationMVArun2017v2DBoldDMwLT2017_, "tauByVTightIsolationMVArun2017v2DBoldDMwLT2017/O");
     tree_->Branch("tauByVVTightIsolationMVArun2017v2DBoldDMwLT2017", &tauByVVTightIsolationMVArun2017v2DBoldDMwLT2017_, "tauByVVTightIsolationMVArun2017v2DBoldDMwLT2017/O");
+
     tree_->Branch("tauByIsolationMVArun2017v2DBnewDMwLTraw2017", &tauByIsolationMVArun2017v2DBnewDMwLTraw2017_, "tauByIsolationMVArun2017v2DBnewDMwLTraw2017/F");
     tree_->Branch("tauByVVLooseIsolationMVArun2017v2DBnewDMwLT2017", &tauByVVLooseIsolationMVArun2017v2DBnewDMwLT2017_, "tauByVVLooseIsolationMVArun2017v2DBnewDMwLT2017/O");
     tree_->Branch("tauByVLooseIsolationMVArun2017v2DBnewDMwLT2017", &tauByVLooseIsolationMVArun2017v2DBnewDMwLT2017_, "tauByVLooseIsolationMVArun2017v2DBnewDMwLT2017/O");
@@ -562,6 +625,33 @@ void NtuplizerQCD::beginJob()
     tree_->Branch("tauByTightIsolationMVArun2017v2DBnewDMwLT2017", &tauByTightIsolationMVArun2017v2DBnewDMwLT2017_, "tauByTightIsolationMVArun2017v2DBnewDMwLT2017/O");
     tree_->Branch("tauByVTightIsolationMVArun2017v2DBnewDMwLT2017", &tauByVTightIsolationMVArun2017v2DBnewDMwLT2017_, "tauByVTightIsolationMVArun2017v2DBnewDMwLT2017/O");
     tree_->Branch("tauByVVTightIsolationMVArun2017v2DBnewDMwLT2017", &tauByVVTightIsolationMVArun2017v2DBnewDMwLT2017_, "tauByVVTightIsolationMVArun2017v2DBnewDMwLT2017/O");
+
+    tree_->Branch("tauByDeepTau2017v2VSjetraw", &tauByDeepTau2017v2VSjetraw_, "tauByDeepTau2017v2VSjetraw/F");
+    tree_->Branch("tauByVVVLooseDeepTau2017v2VSjet", &tauByVVVLooseDeepTau2017v2VSjet_, "tauByVVVLooseDeepTau2017v2VSjet/O");
+    tree_->Branch("tauByVVLooseDeepTau2017v2VSjet", &tauByVVLooseDeepTau2017v2VSjet_, "tauByVVLooseDeepTau2017v2VSjet/O");
+    tree_->Branch("tauByVLooseDeepTau2017v2VSjet", &tauByVLooseDeepTau2017v2VSjet_, "tauByVLooseDeepTau2017v2VSjet/O");
+    tree_->Branch("tauByLooseDeepTau2017v2VSjet", &tauByLooseDeepTau2017v2VSjet_, "tauByLooseDeepTau2017v2VSjet/O");
+    tree_->Branch("tauByMediumDeepTau2017v2VSjet", &tauByMediumDeepTau2017v2VSjet_, "tauByMediumDeepTau2017v2VSjet/O");
+    tree_->Branch("tauByTightDeepTau2017v2VSjet", &tauByTightDeepTau2017v2VSjet_, "tauByTightDeepTau2017v2VSjet/O");
+    tree_->Branch("tauByVTightDeepTau2017v2VSjet", &tauByVTightDeepTau2017v2VSjet_, "tauByVTightDeepTau2017v2VSjet/O");
+    tree_->Branch("tauByVVTightDeepTau2017v2VSjet", &tauByVVTightDeepTau2017v2VSjet_, "tauByVVTightDeepTau2017v2VSjet/O");
+
+    tree_->Branch("tauByDeepTau2017v2VSeraw", &tauByDeepTau2017v2VSeraw_, "tauByDeepTau2017v2VSeraw/F");
+    tree_->Branch("tauByVVVLooseDeepTau2017v2VSe", &tauByVVVLooseDeepTau2017v2VSe_, "tauByVVVLooseDeepTau2017v2VSe/O");
+    tree_->Branch("tauByVVLooseDeepTau2017v2VSe", &tauByVVLooseDeepTau2017v2VSe_, "tauByVVLooseDeepTau2017v2VSe/O");
+    tree_->Branch("tauByVLooseDeepTau2017v2VSe", &tauByVLooseDeepTau2017v2VSe_, "tauByVLooseDeepTau2017v2VSe/O");
+    tree_->Branch("tauByLooseDeepTau2017v2VSe", &tauByLooseDeepTau2017v2VSe_, "tauByLooseDeepTau2017v2VSe/O");
+    tree_->Branch("tauByMediumDeepTau2017v2VSe", &tauByMediumDeepTau2017v2VSe_, "tauByMediumDeepTau2017v2VSe/O");
+    tree_->Branch("tauByTightDeepTau2017v2VSe", &tauByTightDeepTau2017v2VSe_, "tauByTightDeepTau2017v2VSe/O");
+    tree_->Branch("tauByVTightDeepTau2017v2VSe", &tauByVTightDeepTau2017v2VSe_, "tauByVTightDeepTau2017v2VSe/O");
+    tree_->Branch("tauByVVTightDeepTau2017v2VSe", &tauByVVTightDeepTau2017v2VSe_, "tauByVVTightDeepTau2017v2VSe/O");
+    
+    tree_->Branch("tauByDeepTau2017v2VSmuraw", &tauByDeepTau2017v2VSmuraw_, "tauByDeepTau2017v2VSmuraw/F");
+    tree_->Branch("tauByVLooseDeepTau2017v2VSmu", &tauByVLooseDeepTau2017v2VSmu_, "tauByVLooseDeepTau2017v2VSmu/O");
+    tree_->Branch("tauByLooseDeepTau2017v2VSmu", &tauByLooseDeepTau2017v2VSmu_, "tauByLooseDeepTau2017v2VSmu/O");
+    tree_->Branch("tauByMediumDeepTau2017v2VSmu", &tauByMediumDeepTau2017v2VSmu_, "tauByMediumDeepTau2017v2VSmu/O");
+    tree_->Branch("tauByTightDeepTau2017v2VSmu", &tauByTightDeepTau2017v2VSmu_, "tauByTightDeepTau2017v2VSmu/O");
+          
     tree_->Branch("tauAgainstMuonLoose3", &tauAgainstMuonLoose3_,"tauAgainstMuonLoose3/O");
     tree_->Branch("tauAgainstMuonTight3", &tauAgainstMuonTight3_, "tauAgainstMuonTight3/O");
     tree_->Branch("tauAgainstElectronVLooseMVA6", &tauAgainstElectronVLooseMVA6_, "tauAgainstElectronVLooseMVA6/O");
@@ -688,6 +778,7 @@ void NtuplizerQCD::Initialize()
     tauByLooseCombinedIsolationDeltaBetaCorr3Hits_ = 0;
     tauByMediumCombinedIsolationDeltaBetaCorr3Hits_ = 0;
     tauByTightCombinedIsolationDeltaBetaCorr3Hits_ = 0;
+
     tauByIsolationMVArun2017v2DBoldDMwLTraw2017_ = -1.;
     tauByVVLooseIsolationMVArun2017v2DBoldDMwLT2017_ = 0;
     tauByVLooseIsolationMVArun2017v2DBoldDMwLT2017_ = 0;
@@ -696,6 +787,7 @@ void NtuplizerQCD::Initialize()
     tauByTightIsolationMVArun2017v2DBoldDMwLT2017_ = 0;
     tauByVTightIsolationMVArun2017v2DBoldDMwLT2017_ = 0;
     tauByVVTightIsolationMVArun2017v2DBoldDMwLT2017_ = 0;
+
     tauByIsolationMVArun2017v2DBnewDMwLTraw2017_ = -1.;
     tauByVVLooseIsolationMVArun2017v2DBnewDMwLT2017_ = 0;
     tauByVLooseIsolationMVArun2017v2DBnewDMwLT2017_ = 0;
@@ -704,6 +796,33 @@ void NtuplizerQCD::Initialize()
     tauByTightIsolationMVArun2017v2DBnewDMwLT2017_ = 0;
     tauByVTightIsolationMVArun2017v2DBnewDMwLT2017_ = 0;
     tauByVVTightIsolationMVArun2017v2DBnewDMwLT2017_ = 0;
+
+    tauByDeepTau2017v2VSjetraw_ = -1.;
+    tauByVVVLooseDeepTau2017v2VSjet_ = 0;
+    tauByVVLooseDeepTau2017v2VSjet_ = 0;
+    tauByVLooseDeepTau2017v2VSjet_ = 0;
+    tauByLooseDeepTau2017v2VSjet_ = 0;
+    tauByMediumDeepTau2017v2VSjet_ = 0;
+    tauByTightDeepTau2017v2VSjet_ = 0;
+    tauByVTightDeepTau2017v2VSjet_ = 0;
+    tauByVVTightDeepTau2017v2VSjet_ = 0;
+
+    tauByDeepTau2017v2VSeraw_ = -1.;
+    tauByVVVLooseDeepTau2017v2VSe_ = 0;
+    tauByVVLooseDeepTau2017v2VSe_ = 0;
+    tauByVLooseDeepTau2017v2VSe_ = 0;
+    tauByLooseDeepTau2017v2VSe_ = 0;
+    tauByMediumDeepTau2017v2VSe_ = 0;
+    tauByTightDeepTau2017v2VSe_ = 0;
+    tauByVTightDeepTau2017v2VSe_ = 0;
+    tauByVVTightDeepTau2017v2VSe_ = 0;
+
+    tauByDeepTau2017v2VSmuraw_ = -1.;
+    tauByVLooseDeepTau2017v2VSmu_ = 0;
+    tauByLooseDeepTau2017v2VSmu_ = 0;
+    tauByMediumDeepTau2017v2VSmu_ = 0;
+    tauByTightDeepTau2017v2VSmu_ = 0;
+
     tauAgainstMuonLoose3_ = 0;
     tauAgainstMuonTight3_ = 0;
     tauAgainstElectronVLooseMVA6_ = 0;
@@ -825,6 +944,79 @@ int NtuplizerQCD::GenIndex(const pat::TauRef& tau, const edm::View<pat::GenericP
     }
 
     return genMatchInd;
+}
+
+bool NtuplizerQCD::passesJetID(const pat::JetRef& jet, const int year)
+{
+    bool passesID = false;
+    double NHF = jet->neutralHadronEnergyFraction();
+    double NEMF = jet->neutralEmEnergyFraction();
+    double CHF  = jet->chargedHadronEnergyFraction();
+    double MUF  = jet->muonEnergyFraction();
+    double CEMF = jet->chargedEmEnergyFraction();
+    int NumConst = jet->chargedMultiplicity()+jet->neutralMultiplicity();
+    int NumNeutralParticles = jet->neutralMultiplicity();
+    int CHM      = jet->chargedMultiplicity(); 
+    if (year == 2016)
+    {
+        // Use tightLepVetoJetID
+        if (abs(jet->eta()) <= 2.7)
+        {
+            passesID = passesID || (NHF < 0.90 && NEMF < 0.90 && NumConst > 1 && MUF < 0.8 && ((abs(jet->eta()) <= 2.4 && CHF > 0 && CHM > 0 && CEMF < 0.90) || abs(jet->eta()) > 2.4 ) && abs(jet->eta()) <= 2.7);
+        }
+        // use tightID where tightLepVetJetID not applicable.
+        else if ((abs(jet->eta()) > 2.7) && (abs(jet->eta()) <= 3.0))
+        {
+            passesID = (NHF<0.98 && NEMF>0.01 && NumNeutralParticles>2 && abs(jet->eta())>2.7 && abs(jet->eta())<=3.0);
+        }
+        else if (abs(jet->eta()) > 3.0)
+        {
+            passesID = (NEMF<0.90 && NumNeutralParticles>10 && abs(jet->eta())>3.0 );
+        }
+    }
+    else if (year == 2017)
+    {
+        // Use tightLepVetoJetID
+        if (abs(jet->eta()) <= 2.7)
+        {
+            passesID = passesID || (NHF < 0.90 && NEMF < 0.90 && NumConst > 1 && MUF < 0.8 && ((abs(jet->eta()) <= 2.4 && CHF > 0 && CHM > 0 && CEMF < 0.80) || abs(jet->eta()) > 2.4 ) && abs(jet->eta()) <= 2.7);
+        }
+        // use tightID where tightLepVetJetID not applicable.
+        else if ((abs(jet->eta()) > 2.7) && (abs(jet->eta()) <= 3.0))
+        {
+            passesID = passesID || (NEMF>0.02 && NEMF < 0.99 && NumNeutralParticles>2 && abs(jet->eta())>2.7 && abs(jet->eta())<=3.0);
+        }
+        else if (abs(jet->eta()) > 3.0)
+        {
+            passesID = passesID || (NEMF<0.90 && NumNeutralParticles>10 && NHF > 0.02 && abs(jet->eta())>3.0 );
+        }
+    }
+    else if (year == 2018)
+    {
+        // Use tightLepVetoJetID
+        if (abs(jet->eta()) <= 2.6)
+        {
+            passesID = passesID || (abs(jet->eta())<=2.6 && CEMF<0.8 && CHM>0 && CHF>0 && NumConst>1 && NEMF<0.9 && MUF <0.8 && NHF < 0.9 );
+        }
+        else if ((abs(jet->eta()) > 2.6) && (abs(jet->eta()) <= 2.7))
+        {
+            passesID = passesID || ( abs(jet->eta())>2.6 && abs(jet->eta())<=2.7 && CEMF<0.8 && CHM>0 && NEMF<0.99 && MUF <0.8 && NHF < 0.9 );
+        }
+        // use tightID where tightLepVetJetID not applicable.
+        else if ((abs(jet->eta()) > 2.7) && (abs(jet->eta()) <= 3.0))
+        {
+            passesID = passesID || ( NEMF>0.02 && NEMF<0.99 && NumNeutralParticles>2 && abs(jet->eta())>2.7 && abs(jet->eta())<=3.0 );
+        }
+        else if (abs(jet->eta()) > 3.0)
+        {
+            passesID = passesID || (NEMF<0.90 && NHF>0.2 && NumNeutralParticles>10 && abs(jet->eta())>3.0 );
+        }
+    }
+    else
+    {
+        std::cout << "No JetID defined for this year." << std::endl;
+    }
+    return passesID;
 }
 
 //define this as a plug-in
