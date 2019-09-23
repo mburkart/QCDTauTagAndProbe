@@ -144,6 +144,9 @@ class NtuplizerQCD : public edm::EDAnalyzer {
       float metPt_;
       float metPhi_;
 
+      bool tauDecayModeFinding_;
+      bool tauDecayModeFindingNewDMs_;
+
       bool tauByLooseCombinedIsolationDeltaBetaCorr3Hits_;
       bool tauByMediumCombinedIsolationDeltaBetaCorr3Hits_;
       bool tauByTightCombinedIsolationDeltaBetaCorr3Hits_;
@@ -462,6 +465,9 @@ void NtuplizerQCD::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
                             tauDM_ = tau->decayMode();
                             tauTrkPt_ = tau->leadChargedHadrCand()->pt();
 
+                            tauDecayModeFinding_ = tau->tauID("decayModeFinding");
+                            tauDecayModeFindingNewDMs_ = tau->tauID("decayModeFindingNewDMs");
+
                             tauByLooseCombinedIsolationDeltaBetaCorr3Hits_ = tau->tauID("byLooseCombinedIsolationDeltaBetaCorr3Hits");
                             tauByMediumCombinedIsolationDeltaBetaCorr3Hits_ = tau->tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits");
                             tauByTightCombinedIsolationDeltaBetaCorr3Hits_ = tau->tauID("byTightCombinedIsolationDeltaBetaCorr3Hits");
@@ -604,61 +610,64 @@ void NtuplizerQCD::beginJob()
     tree_->Branch("tauTrkPt", &tauTrkPt_, "tauTrkPt/F");
     tree_->Branch("tau_genindex", &tau_genindex_, "tau_genindex/I");
 
-    tree_->Branch("tauByLooseCombinedIsolationDeltaBetaCorr3Hits", &tauByLooseCombinedIsolationDeltaBetaCorr3Hits_, "tauByLooseCombinedIsolationDeltaBetaCorr3Hits/O");
-    tree_->Branch("tauByMediumCombinedIsolationDeltaBetaCorr3Hits", &tauByMediumCombinedIsolationDeltaBetaCorr3Hits_, "tauByMediumCombinedIsolationDeltaBetaCorr3Hits/O");
-    tree_->Branch("tauByTightCombinedIsolationDeltaBetaCorr3Hits", &tauByTightCombinedIsolationDeltaBetaCorr3Hits_, "tauByTightCombinedIsolationDeltaBetaCorr3Hits/O");
+    tree_->Branch("decayModeFinding", &tauDecayModeFinding_, "decayModeFinding/O");
+    tree_->Branch("decayModeFindingNewDMs", &tauDecayModeFindingNewDMs_, "decayModeFindingsNewDMs/O");
+
+    tree_->Branch("byLooseCombinedIsolationDeltaBetaCorr3Hits", &tauByLooseCombinedIsolationDeltaBetaCorr3Hits_, "byLooseCombinedIsolationDeltaBetaCorr3Hits/O");
+    tree_->Branch("byMediumCombinedIsolationDeltaBetaCorr3Hits", &tauByMediumCombinedIsolationDeltaBetaCorr3Hits_, "byMediumCombinedIsolationDeltaBetaCorr3Hits/O");
+    tree_->Branch("byTightCombinedIsolationDeltaBetaCorr3Hits", &tauByTightCombinedIsolationDeltaBetaCorr3Hits_, "byTightCombinedIsolationDeltaBetaCorr3Hits/O");
     
-    tree_->Branch("tauByIsolationMVArun2017v2DBoldDMwLTraw2017", &tauByIsolationMVArun2017v2DBoldDMwLTraw2017_, "tauByIsolationMVArun2017v2DBoldDMwLTraw2017/F");
-    tree_->Branch("tauByVVLooseIsolationMVArun2017v2DBoldDMwLT2017", &tauByVVLooseIsolationMVArun2017v2DBoldDMwLT2017_, "tauByVVLooseIsolationMVArun2017v2DBoldDMwLT2017/O");
-    tree_->Branch("tauByVLooseIsolationMVArun2017v2DBoldDMwLT2017", &tauByVLooseIsolationMVArun2017v2DBoldDMwLT2017_, "tauByVLooseIsolationMVArun2017v2DBoldDMwLT2017/O");
-    tree_->Branch("tauByLooseIsolationMVArun2017v2DBoldDMwLT2017", &tauByLooseIsolationMVArun2017v2DBoldDMwLT2017_, "tauByLooseIsolationMVArun2017v2DBoldDMwLT2017/O");
-    tree_->Branch("tauByMediumIsolationMVArun2017v2DBoldDMwLT2017", &tauByMediumIsolationMVArun2017v2DBoldDMwLT2017_, "tauByMediumIsolationMVArun2017v2DBoldDMwLT2017/O");
-    tree_->Branch("tauByTightIsolationMVArun2017v2DBoldDMwLT2017", &tauByTightIsolationMVArun2017v2DBoldDMwLT2017_, "tauByTightIsolationMVArun2017v2DBoldDMwLT2017/O");
-    tree_->Branch("tauByVTightIsolationMVArun2017v2DBoldDMwLT2017", &tauByVTightIsolationMVArun2017v2DBoldDMwLT2017_, "tauByVTightIsolationMVArun2017v2DBoldDMwLT2017/O");
-    tree_->Branch("tauByVVTightIsolationMVArun2017v2DBoldDMwLT2017", &tauByVVTightIsolationMVArun2017v2DBoldDMwLT2017_, "tauByVVTightIsolationMVArun2017v2DBoldDMwLT2017/O");
+    tree_->Branch("byIsolationMVArun2017v2DBoldDMwLTraw2017", &tauByIsolationMVArun2017v2DBoldDMwLTraw2017_, "byIsolationMVArun2017v2DBoldDMwLTraw2017/F");
+    tree_->Branch("byVVLooseIsolationMVArun2017v2DBoldDMwLT2017", &tauByVVLooseIsolationMVArun2017v2DBoldDMwLT2017_, "byVVLooseIsolationMVArun2017v2DBoldDMwLT2017/O");
+    tree_->Branch("byVLooseIsolationMVArun2017v2DBoldDMwLT2017", &tauByVLooseIsolationMVArun2017v2DBoldDMwLT2017_, "byVLooseIsolationMVArun2017v2DBoldDMwLT2017/O");
+    tree_->Branch("byLooseIsolationMVArun2017v2DBoldDMwLT2017", &tauByLooseIsolationMVArun2017v2DBoldDMwLT2017_, "byLooseIsolationMVArun2017v2DBoldDMwLT2017/O");
+    tree_->Branch("byMediumIsolationMVArun2017v2DBoldDMwLT2017", &tauByMediumIsolationMVArun2017v2DBoldDMwLT2017_, "byMediumIsolationMVArun2017v2DBoldDMwLT2017/O");
+    tree_->Branch("byTightIsolationMVArun2017v2DBoldDMwLT2017", &tauByTightIsolationMVArun2017v2DBoldDMwLT2017_, "byTightIsolationMVArun2017v2DBoldDMwLT2017/O");
+    tree_->Branch("byVTightIsolationMVArun2017v2DBoldDMwLT2017", &tauByVTightIsolationMVArun2017v2DBoldDMwLT2017_, "byVTightIsolationMVArun2017v2DBoldDMwLT2017/O");
+    tree_->Branch("byVVTightIsolationMVArun2017v2DBoldDMwLT2017", &tauByVVTightIsolationMVArun2017v2DBoldDMwLT2017_, "byVVTightIsolationMVArun2017v2DBoldDMwLT2017/O");
 
-    tree_->Branch("tauByIsolationMVArun2017v2DBnewDMwLTraw2017", &tauByIsolationMVArun2017v2DBnewDMwLTraw2017_, "tauByIsolationMVArun2017v2DBnewDMwLTraw2017/F");
-    tree_->Branch("tauByVVLooseIsolationMVArun2017v2DBnewDMwLT2017", &tauByVVLooseIsolationMVArun2017v2DBnewDMwLT2017_, "tauByVVLooseIsolationMVArun2017v2DBnewDMwLT2017/O");
-    tree_->Branch("tauByVLooseIsolationMVArun2017v2DBnewDMwLT2017", &tauByVLooseIsolationMVArun2017v2DBnewDMwLT2017_, "tauByVLooseIsolationMVArun2017v2DBnewDMwLT2017/O");
-    tree_->Branch("tauByLooseIsolationMVArun2017v2DBnewDMwLT2017", &tauByLooseIsolationMVArun2017v2DBnewDMwLT2017_, "tauByLooseIsolationMVArun2017v2DBnewDMwLT2017/O");
-    tree_->Branch("tauByMediumIsolationMVArun2017v2DBnewDMwLT2017", &tauByMediumIsolationMVArun2017v2DBnewDMwLT2017_, "tauByMediumIsolationMVArun2017v2DBnewDMwLT2017/O");
-    tree_->Branch("tauByTightIsolationMVArun2017v2DBnewDMwLT2017", &tauByTightIsolationMVArun2017v2DBnewDMwLT2017_, "tauByTightIsolationMVArun2017v2DBnewDMwLT2017/O");
-    tree_->Branch("tauByVTightIsolationMVArun2017v2DBnewDMwLT2017", &tauByVTightIsolationMVArun2017v2DBnewDMwLT2017_, "tauByVTightIsolationMVArun2017v2DBnewDMwLT2017/O");
-    tree_->Branch("tauByVVTightIsolationMVArun2017v2DBnewDMwLT2017", &tauByVVTightIsolationMVArun2017v2DBnewDMwLT2017_, "tauByVVTightIsolationMVArun2017v2DBnewDMwLT2017/O");
+    tree_->Branch("byIsolationMVArun2017v2DBnewDMwLTraw2017", &tauByIsolationMVArun2017v2DBnewDMwLTraw2017_, "byIsolationMVArun2017v2DBnewDMwLTraw2017/F");
+    tree_->Branch("byVVLooseIsolationMVArun2017v2DBnewDMwLT2017", &tauByVVLooseIsolationMVArun2017v2DBnewDMwLT2017_, "byVVLooseIsolationMVArun2017v2DBnewDMwLT2017/O");
+    tree_->Branch("byVLooseIsolationMVArun2017v2DBnewDMwLT2017", &tauByVLooseIsolationMVArun2017v2DBnewDMwLT2017_, "byVLooseIsolationMVArun2017v2DBnewDMwLT2017/O");
+    tree_->Branch("byLooseIsolationMVArun2017v2DBnewDMwLT2017", &tauByLooseIsolationMVArun2017v2DBnewDMwLT2017_, "byLooseIsolationMVArun2017v2DBnewDMwLT2017/O");
+    tree_->Branch("byMediumIsolationMVArun2017v2DBnewDMwLT2017", &tauByMediumIsolationMVArun2017v2DBnewDMwLT2017_, "byMediumIsolationMVArun2017v2DBnewDMwLT2017/O");
+    tree_->Branch("byTightIsolationMVArun2017v2DBnewDMwLT2017", &tauByTightIsolationMVArun2017v2DBnewDMwLT2017_, "byTightIsolationMVArun2017v2DBnewDMwLT2017/O");
+    tree_->Branch("byVTightIsolationMVArun2017v2DBnewDMwLT2017", &tauByVTightIsolationMVArun2017v2DBnewDMwLT2017_, "byVTightIsolationMVArun2017v2DBnewDMwLT2017/O");
+    tree_->Branch("byVVTightIsolationMVArun2017v2DBnewDMwLT2017", &tauByVVTightIsolationMVArun2017v2DBnewDMwLT2017_, "byVVTightIsolationMVArun2017v2DBnewDMwLT2017/O");
 
-    tree_->Branch("tauByDeepTau2017v2VSjetraw", &tauByDeepTau2017v2VSjetraw_, "tauByDeepTau2017v2VSjetraw/F");
-    tree_->Branch("tauByVVVLooseDeepTau2017v2VSjet", &tauByVVVLooseDeepTau2017v2VSjet_, "tauByVVVLooseDeepTau2017v2VSjet/O");
-    tree_->Branch("tauByVVLooseDeepTau2017v2VSjet", &tauByVVLooseDeepTau2017v2VSjet_, "tauByVVLooseDeepTau2017v2VSjet/O");
-    tree_->Branch("tauByVLooseDeepTau2017v2VSjet", &tauByVLooseDeepTau2017v2VSjet_, "tauByVLooseDeepTau2017v2VSjet/O");
-    tree_->Branch("tauByLooseDeepTau2017v2VSjet", &tauByLooseDeepTau2017v2VSjet_, "tauByLooseDeepTau2017v2VSjet/O");
-    tree_->Branch("tauByMediumDeepTau2017v2VSjet", &tauByMediumDeepTau2017v2VSjet_, "tauByMediumDeepTau2017v2VSjet/O");
-    tree_->Branch("tauByTightDeepTau2017v2VSjet", &tauByTightDeepTau2017v2VSjet_, "tauByTightDeepTau2017v2VSjet/O");
-    tree_->Branch("tauByVTightDeepTau2017v2VSjet", &tauByVTightDeepTau2017v2VSjet_, "tauByVTightDeepTau2017v2VSjet/O");
-    tree_->Branch("tauByVVTightDeepTau2017v2VSjet", &tauByVVTightDeepTau2017v2VSjet_, "tauByVVTightDeepTau2017v2VSjet/O");
+    tree_->Branch("byDeepTau2017v2VSjetraw", &tauByDeepTau2017v2VSjetraw_, "byDeepTau2017v2VSjetraw/F");
+    tree_->Branch("byVVVLooseDeepTau2017v2VSjet", &tauByVVVLooseDeepTau2017v2VSjet_, "byVVVLooseDeepTau2017v2VSjet/O");
+    tree_->Branch("byVVLooseDeepTau2017v2VSjet", &tauByVVLooseDeepTau2017v2VSjet_, "byVVLooseDeepTau2017v2VSjet/O");
+    tree_->Branch("byVLooseDeepTau2017v2VSjet", &tauByVLooseDeepTau2017v2VSjet_, "byVLooseDeepTau2017v2VSjet/O");
+    tree_->Branch("byLooseDeepTau2017v2VSjet", &tauByLooseDeepTau2017v2VSjet_, "byLooseDeepTau2017v2VSjet/O");
+    tree_->Branch("byMediumDeepTau2017v2VSjet", &tauByMediumDeepTau2017v2VSjet_, "byMediumDeepTau2017v2VSjet/O");
+    tree_->Branch("byTightDeepTau2017v2VSjet", &tauByTightDeepTau2017v2VSjet_, "byTightDeepTau2017v2VSjet/O");
+    tree_->Branch("byVTightDeepTau2017v2VSjet", &tauByVTightDeepTau2017v2VSjet_, "byVTightDeepTau2017v2VSjet/O");
+    tree_->Branch("byVVTightDeepTau2017v2VSjet", &tauByVVTightDeepTau2017v2VSjet_, "byVVTightDeepTau2017v2VSjet/O");
 
-    tree_->Branch("tauByDeepTau2017v2VSeraw", &tauByDeepTau2017v2VSeraw_, "tauByDeepTau2017v2VSeraw/F");
-    tree_->Branch("tauByVVVLooseDeepTau2017v2VSe", &tauByVVVLooseDeepTau2017v2VSe_, "tauByVVVLooseDeepTau2017v2VSe/O");
-    tree_->Branch("tauByVVLooseDeepTau2017v2VSe", &tauByVVLooseDeepTau2017v2VSe_, "tauByVVLooseDeepTau2017v2VSe/O");
-    tree_->Branch("tauByVLooseDeepTau2017v2VSe", &tauByVLooseDeepTau2017v2VSe_, "tauByVLooseDeepTau2017v2VSe/O");
-    tree_->Branch("tauByLooseDeepTau2017v2VSe", &tauByLooseDeepTau2017v2VSe_, "tauByLooseDeepTau2017v2VSe/O");
-    tree_->Branch("tauByMediumDeepTau2017v2VSe", &tauByMediumDeepTau2017v2VSe_, "tauByMediumDeepTau2017v2VSe/O");
-    tree_->Branch("tauByTightDeepTau2017v2VSe", &tauByTightDeepTau2017v2VSe_, "tauByTightDeepTau2017v2VSe/O");
-    tree_->Branch("tauByVTightDeepTau2017v2VSe", &tauByVTightDeepTau2017v2VSe_, "tauByVTightDeepTau2017v2VSe/O");
-    tree_->Branch("tauByVVTightDeepTau2017v2VSe", &tauByVVTightDeepTau2017v2VSe_, "tauByVVTightDeepTau2017v2VSe/O");
+    tree_->Branch("byDeepTau2017v2VSeraw", &tauByDeepTau2017v2VSeraw_, "byDeepTau2017v2VSeraw/F");
+    tree_->Branch("byVVVLooseDeepTau2017v2VSe", &tauByVVVLooseDeepTau2017v2VSe_, "byVVVLooseDeepTau2017v2VSe/O");
+    tree_->Branch("byVVLooseDeepTau2017v2VSe", &tauByVVLooseDeepTau2017v2VSe_, "byVVLooseDeepTau2017v2VSe/O");
+    tree_->Branch("byVLooseDeepTau2017v2VSe", &tauByVLooseDeepTau2017v2VSe_, "byVLooseDeepTau2017v2VSe/O");
+    tree_->Branch("byLooseDeepTau2017v2VSe", &tauByLooseDeepTau2017v2VSe_, "byLooseDeepTau2017v2VSe/O");
+    tree_->Branch("byMediumDeepTau2017v2VSe", &tauByMediumDeepTau2017v2VSe_, "byMediumDeepTau2017v2VSe/O");
+    tree_->Branch("byTightDeepTau2017v2VSe", &tauByTightDeepTau2017v2VSe_, "byTightDeepTau2017v2VSe/O");
+    tree_->Branch("byVTightDeepTau2017v2VSe", &tauByVTightDeepTau2017v2VSe_, "byVTightDeepTau2017v2VSe/O");
+    tree_->Branch("byVVTightDeepTau2017v2VSe", &tauByVVTightDeepTau2017v2VSe_, "byVVTightDeepTau2017v2VSe/O");
     
-    tree_->Branch("tauByDeepTau2017v2VSmuraw", &tauByDeepTau2017v2VSmuraw_, "tauByDeepTau2017v2VSmuraw/F");
-    tree_->Branch("tauByVLooseDeepTau2017v2VSmu", &tauByVLooseDeepTau2017v2VSmu_, "tauByVLooseDeepTau2017v2VSmu/O");
-    tree_->Branch("tauByLooseDeepTau2017v2VSmu", &tauByLooseDeepTau2017v2VSmu_, "tauByLooseDeepTau2017v2VSmu/O");
-    tree_->Branch("tauByMediumDeepTau2017v2VSmu", &tauByMediumDeepTau2017v2VSmu_, "tauByMediumDeepTau2017v2VSmu/O");
-    tree_->Branch("tauByTightDeepTau2017v2VSmu", &tauByTightDeepTau2017v2VSmu_, "tauByTightDeepTau2017v2VSmu/O");
+    tree_->Branch("byDeepTau2017v2VSmuraw", &tauByDeepTau2017v2VSmuraw_, "byDeepTau2017v2VSmuraw/F");
+    tree_->Branch("byVLooseDeepTau2017v2VSmu", &tauByVLooseDeepTau2017v2VSmu_, "byVLooseDeepTau2017v2VSmu/O");
+    tree_->Branch("byLooseDeepTau2017v2VSmu", &tauByLooseDeepTau2017v2VSmu_, "byLooseDeepTau2017v2VSmu/O");
+    tree_->Branch("byMediumDeepTau2017v2VSmu", &tauByMediumDeepTau2017v2VSmu_, "byMediumDeepTau2017v2VSmu/O");
+    tree_->Branch("byTightDeepTau2017v2VSmu", &tauByTightDeepTau2017v2VSmu_, "byTightDeepTau2017v2VSmu/O");
           
-    tree_->Branch("tauAgainstMuonLoose3", &tauAgainstMuonLoose3_,"tauAgainstMuonLoose3/O");
-    tree_->Branch("tauAgainstMuonTight3", &tauAgainstMuonTight3_, "tauAgainstMuonTight3/O");
-    tree_->Branch("tauAgainstElectronVLooseMVA6", &tauAgainstElectronVLooseMVA6_, "tauAgainstElectronVLooseMVA6/O");
-    tree_->Branch("tauAgainstElectronLooseMVA6", &tauAgainstElectronLooseMVA6_, "tauAgainstElectronLooseMVA6/O");
-    tree_->Branch("tauAgainstElectronMediumMVA6", &tauAgainstElectronMediumMVA6_, "tauAgainstElectronMediumMVA6/O");
-    tree_->Branch("tauAgainstElectronTightMVA6", &tauAgainstElectronTightMVA6_, "tauAgainstElectronTightMVA6/O");
-    tree_->Branch("tauAgainstElectronVTightMVA6", &tauAgainstElectronVTightMVA6_, "tauAgainstElectronVTightMVA6/O");
+    tree_->Branch("againstMuonLoose3", &tauAgainstMuonLoose3_,"againstMuonLoose3/O");
+    tree_->Branch("againstMuonTight3", &tauAgainstMuonTight3_, "againstMuonTight3/O");
+    tree_->Branch("againstElectronVLooseMVA6", &tauAgainstElectronVLooseMVA6_, "againstElectronVLooseMVA6/O");
+    tree_->Branch("againstElectronLooseMVA6", &tauAgainstElectronLooseMVA6_, "againstElectronLooseMVA6/O");
+    tree_->Branch("againstElectronMediumMVA6", &tauAgainstElectronMediumMVA6_, "againstElectronMediumMVA6/O");
+    tree_->Branch("againstElectronTightMVA6", &tauAgainstElectronTightMVA6_, "againstElectronTightMVA6/O");
+    tree_->Branch("againstElectronVTightMVA6", &tauAgainstElectronVTightMVA6_, "againstElectronVTightMVA6/O");
     tree_->Branch("tauTriggerBits", &tauTriggerBits_, "tauTriggerBits/l");
     tree_->Branch("jetTagTriggerBits", &jetTagTriggerBits_, "jetTagTriggerBits/l");
 
@@ -774,6 +783,8 @@ void NtuplizerQCD::Initialize()
     tauDM_ = -1;
     tauTrkPt_ = -1.;
     tau_genindex_ = -1;
+    tauDecayModeFinding_ = 0;
+    tauDecayModeFindingNewDMs_ = 0;
 
     tauByLooseCombinedIsolationDeltaBetaCorr3Hits_ = 0;
     tauByMediumCombinedIsolationDeltaBetaCorr3Hits_ = 0;
