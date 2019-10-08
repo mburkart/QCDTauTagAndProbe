@@ -7,6 +7,7 @@ process = cms.Process("TagAndProbe")
 isMC = True
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.GeometryRecoDB_cff")
 
 #### handling of cms line options for tier3 submission
@@ -63,6 +64,34 @@ setupEgammaPostRecoSeq(process,
                        ],
                        phoIDModules=[])
 
+from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
+updateJetCollection(
+        process,
+        jetSource = cms.InputTag("slimmedJets"),
+        pvSource = cms.InputTag("offlineSlimmedPrimaryVertices"),
+        svSource = cms.InputTag("slimmedSecondaryVertices"),
+        jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']), 'None'),
+        btagDiscriminators = [
+            'pfDeepFlavourJetTags:probb',
+            'pfDeepFlavourJetTags:probbb',
+            'pfDeepFlavourJetTags:problepb',
+            ],
+        postfix='NewDFTraining'
+)
+
+process.bTaggingSequence = cms.Sequence(
+        process.patJetCorrFactorsNewDFTraining +
+        process.updatedPatJetsNewDFTraining +
+        process.pfImpactParameterTagInfosNewDFTraining +
+        process.pfInclusiveSecondaryVertexFinderTagInfosNewDFTraining +
+        process.pfDeepCSVTagInfosNewDFTraining +
+        process.pfDeepFlavourTagInfosNewDFTraining +
+        process.pfDeepFlavourJetTagsNewDFTraining +
+        process.patJetCorrFactorsTransientCorrectedNewDFTraining +
+        process.updatedPatJetsTransientCorrectedNewDFTraining +
+        process.selectedUpdatedPatJetsNewDFTraining
+)
+
 #START RERUNNING OF ID TRAINING
 #
 # set up the rerunning of the latest tau id trainings
@@ -70,7 +99,7 @@ import RecoTauTag.RecoTau.tools.runTauIdMVA as idemb
 na = idemb.TauIDEmbedder(process, cms,
         debug=True,
         updatedTauName="NewTauIDsEmbedded",
-        toKeep=["2017v2", "newDM2017v2", "deepTau2017v2"]
+        toKeep=["2017v2", "newDM2017v2", "deepTau2017v2p1"]
 )
 na.runTauID()
 
@@ -134,6 +163,7 @@ process.p = cms.Path(
     process.egammaPostRecoSeq +
     process.QGTagger +
     process.TAndPSeq +
+    process.bTaggingSequence +
     process.VetoSeq +
     process.NtupleSeq
 )
