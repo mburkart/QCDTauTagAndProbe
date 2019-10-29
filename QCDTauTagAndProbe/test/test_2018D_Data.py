@@ -4,7 +4,7 @@ import FWCore.PythonUtilities.LumiList as LumiList
 
 process = cms.Process("TagAndProbe")
 
-isMC = True
+isMC = False
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
@@ -52,7 +52,7 @@ options.parseArguments()
 
 from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
 setupEgammaPostRecoSeq(process,
-                       era="2017-Nov17ReReco",
+                       era="2018-Prompt",
                        eleIDModules=[
                            "RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff",
 
@@ -112,19 +112,20 @@ process.QGTagger.jetsLabel = cms.string("QGL_AK4PFchs")
 
 if not isMC: # will use 80X
     from Configuration.AlCa.autoCond import autoCond
-    process.GlobalTag.globaltag = '102X_dataRun2_v8'
-    process.load('QCDTauTagAndProbe.QCDTauTagAndProbe.tagAndProbe_2017_cff')
+    # process.GlobalTag.globaltag = '102X_dataRun2_Sep2018ABC_v2'
+    process.GlobalTag.globaltag = '102X_dataRun2_Prompt_v13'
+    process.load('QCDTauTagAndProbe.QCDTauTagAndProbe.tagAndProbe_2018_cff')
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
-            '/store/data/Run2017C/JetHT/MINIAOD/31Mar2018-v1/80000/88B65B5C-E73C-E811-AC19-E4115BCE9004.root'
+            'file:///storage/9/mburkart/QCDTestSample/JetHT_24EE1E9B-FB39-E811-9657-0CC47A78A41C.root'
         ),
     )
 else:
-    process.GlobalTag.globaltag = '102X_mc2017_realistic_v6' #MC 25 ns miniAODv2
-    process.load('QCDTauTagAndProbe.QCDTauTagAndProbe.MCanalysis_2017_cff')
+    process.GlobalTag.globaltag = '102X_upgrade2018_realistic_v18' #MC 25 ns miniAODv2
+    process.load('QCDTauTagAndProbe.QCDTauTagAndProbe.MCanalysis_2018_cff')
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
-             '/store/mc/RunIIFall17MiniAODv2/QCD_Pt_3200toInf_TuneCP5_13TeV_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/8249A5BD-7742-E811-BD19-B496910A8AB4.root'
+             'file:///storage/9/mburkart/QCDTestSample/QCD_Pt_3200toInf_9ACFBACD-E042-E811-BB4B-008CFA1C6414.root'
         )
     )
 

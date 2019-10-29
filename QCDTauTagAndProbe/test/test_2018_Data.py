@@ -117,7 +117,7 @@ if not isMC: # will use 80X
     process.load('QCDTauTagAndProbe.QCDTauTagAndProbe.tagAndProbe_2018_cff')
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
-            'file:///storage/9/mburkart/QCDTestSample/JetHT_24EE1E9B-FB39-E811-9657-0CC47A78A41C.root'
+            '/store/data/Run2018C/JetHT/MINIAOD/17Sep2018-v1/80000/4B9AC881-721B-8D4E-BBE8-F0BC54D41BEB.root'
         ),
     )
 else:
@@ -125,7 +125,7 @@ else:
     process.load('QCDTauTagAndProbe.QCDTauTagAndProbe.MCanalysis_2018_cff')
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
-             'file:///storage/9/mburkart/QCDTestSample/QCD_Pt_3200toInf_9ACFBACD-E042-E811-BB4B-008CFA1C6414.root'
+             '/store/mc/RunIIAutumn18MiniAOD/QCD_Pt_2400to3200_TuneCP5_13TeV_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15_ext1-v2/80000/A4281EBE-0E7B-984F-820E-1E17A612F1C0.root'
         )
     )
 

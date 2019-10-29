@@ -112,19 +112,19 @@ process.QGTagger.jetsLabel = cms.string("QGL_AK4PFchs")
 
 if not isMC: # will use 80X
     from Configuration.AlCa.autoCond import autoCond
-    process.GlobalTag.globaltag = '94X_dataRun2_v11'
+    process.GlobalTag.globaltag = '102X_dataRun2_v8'
     process.load('QCDTauTagAndProbe.QCDTauTagAndProbe.tagAndProbe_2017_cff')
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
-            'file:///storage/9/mburkart/QCDTestSample/JetHT_24EE1E9B-FB39-E811-9657-0CC47A78A41C.root'
+            '/store/data/Run2017C/JetHT/MINIAOD/31Mar2018-v1/80000/88B65B5C-E73C-E811-AC19-E4115BCE9004.root'
         ),
     )
 else:
-    process.GlobalTag.globaltag = '94X_mc2017_realistic_v14' #MC 25 ns miniAODv2
+    process.GlobalTag.globaltag = '102X_mc2017_realistic_v6' #MC 25 ns miniAODv2
     process.load('QCDTauTagAndProbe.QCDTauTagAndProbe.MCanalysis_2017_cff')
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
-             'file:///storage/9/mburkart/QCDTestSample/QCD_Pt_3200toInf_9ACFBACD-E042-E811-BB4B-008CFA1C6414.root'
+             '/store/mc/RunIIFall17MiniAODv2/QCD_Pt_3200toInf_TuneCP5_13TeV_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/8249A5BD-7742-E811-BD19-B496910A8AB4.root'
         )
     )
 

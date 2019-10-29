@@ -112,19 +112,19 @@ process.QGTagger.jetsLabel = cms.string("QGL_AK4PFchs")
 
 if not isMC: # will use 80X
     from Configuration.AlCa.autoCond import autoCond
-    process.GlobalTag.globaltag = '94X_dataRun2_v10'
+    process.GlobalTag.globaltag = '102X_dataRun2_nanoAOD_2016_v1'
     process.load('QCDTauTagAndProbe.QCDTauTagAndProbe.tagAndProbe_2016_cff')
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
-            'file:///storage/9/mburkart/QCDTestSample/JetHT_24EE1E9B-FB39-E811-9657-0CC47A78A41C.root'
+            '/store/data/Run2016E/JetHT/MINIAOD/17Jul2018-v1/00000/B25DDF93-0F8D-E811-A8B9-0017A4770470.root'
         ),
     )
 else:
-    process.GlobalTag.globaltag = '94X_mcRun2_asymptotic_v3' #MC 25 ns miniAODv2
+    process.GlobalTag.globaltag = '102X_mcRun2_asymptotic_v6' #MC 25 ns miniAODv2
     process.load('QCDTauTagAndProbe.QCDTauTagAndProbe.MCanalysis_2016_cff')
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
-             'file:///storage/9/mburkart/QCDTestSample/QCD_Pt_3200toInf_9ACFBACD-E042-E811-BB4B-008CFA1C6414.root'
+             '/store/mc/RunIISummer16MiniAODv3/QCD_Pt_2400to3200_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/100000/6EA405A4-9AE1-E811-A68D-48FD8E2824B3.root'
         )
     )
 
