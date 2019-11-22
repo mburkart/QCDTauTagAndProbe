@@ -611,7 +611,7 @@ void NtuplizerQCD::beginJob()
     tree_->Branch("tau_genindex", &tau_genindex_, "tau_genindex/I");
 
     tree_->Branch("decayModeFinding", &tauDecayModeFinding_, "decayModeFinding/O");
-    tree_->Branch("decayModeFindingNewDMs", &tauDecayModeFindingNewDMs_, "decayModeFindingsNewDMs/O");
+    tree_->Branch("decayModeFindingNewDMs", &tauDecayModeFindingNewDMs_, "decayModeFindingNewDMs/O");
 
     tree_->Branch("byLooseCombinedIsolationDeltaBetaCorr3Hits", &tauByLooseCombinedIsolationDeltaBetaCorr3Hits_, "byLooseCombinedIsolationDeltaBetaCorr3Hits/O");
     tree_->Branch("byMediumCombinedIsolationDeltaBetaCorr3Hits", &tauByMediumCombinedIsolationDeltaBetaCorr3Hits_, "byMediumCombinedIsolationDeltaBetaCorr3Hits/O");
